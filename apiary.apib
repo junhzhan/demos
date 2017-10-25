@@ -1,0 +1,1290 @@
+FORMAT: 1A
+HOST: http://gym.39sports.cn/user
+
+# 39嘟用户端
+
+## 错误码
+
+* 4000: 请求参数无效
+* 4001: 不在可预订日期范围
+* 4002: 场次已被预订
+* 4003: 场次数超过上限
+* 4004: 预订次数超过上限
+* 4005: 账户余额不足
+* 4006: 订单状态不可支付
+* 4007: 订单已过期
+* 4008: 微信统一下单接口不可用
+* 4009: 密码格式错误
+* 4011: 验证码发送失败
+* 4012: 未绑定手机
+* 4013: 验证码错误
+* 4014：手机号格式错误
+* 4015: 手机号已绑定
+* 4016：账户余额不足
+* 4017：账户支付失败
+* 4018：取消订单失败
+* 4019: 手机号已经被其他账号绑定
+* 4020：退款失败
+* 4021：订单已申请退款
+* 4022：订单类型不可退款
+* 4023：订单状态不可退款
+* 4024：订单已过开始时间
+* 4025：场馆不支持退款
+* 4026: 次票不存在
+* 4027: 赠票不存在
+* 4028: 赠票修改状态失败
+* 4030: 已经领取过赠票
+* 4031: 赠票不存在或已领完
+* 4032: 不能受赠自己的票
+* 4033: 会员卡不存在
+* 4034: 用户会员卡不存在
+* 4040: 没有可绑定的课程
+* 4100: JSSDK获取ACCESS_TOKEN失败
+* 4101: JSSDK获取TICKET失败
+* 4102: JSSDK生成签名失败
+* 4111: 头像上传时获取失败
+* 4112: 头像上传失败
+* 4113: 头像上传时存储失败
+* 4114: 头像不存在
+* 4115: 提交基本信息失败
+* 4117: 会员卡不存在
+* 4118: 绑定会员卡失败
+* 4119: 已经绑定会员卡
+* 4120: 获取定位信息失败
+* 4121: 所在城市未提供运动场馆服务
+
+
+## 运动类型 [/api/v1/sports]
+
+### 获取运动类型 [GET]
+
++ Response 200 (application/json)
+    + Attributes
+        + errorCode (enum) - 错误码
+            + 2000 (number) - 成功
+        + errorMessage - 错误描述
+        + result (array[SportInfo]) - 支持的运动类型
+
+## 运动中心列表 [/api/v1/centers{?city,type,pageStart,pageCount}]
+
++ Parameters
+    + city: wenzhou (optional) - 城市标识
+        + Default: wenzhou
+    + type: 1 (optional) - 运动类型标识，如果不存在，会列出所有类型的场馆
+    + pageStart (number, optional) - 从第几条记录开始请求，带pageStart则必须带pageCount
+    + pageCount (number, optional) - 请求记录数量，固定为10，带pageCount则必须带pageStart
+
+### 获取运动中心列表 [GET]
+
++ Response 200 (application/json)
+    + Attributes
+        + errorCode (enum) - 错误码
+            + 2000 (number) - 成功
+        + errorMessage - 错误描述
+        + result
+            + hasNextPage: true (boolean) - 是否有下一页
+            + totalCount: 10 (number) - 总记录数
+            + rows (array[CenterSummary]) - 运动中心列表
+
+## 运动中心 [/api/v1/center{?id}]
++ Parameters
+    + id: 1 - 体育中心编号
+
+### 获取运动中心信息 [GET]
+
++ Response 200 (application/json)
+    + Attributes
+        + errorCode (enum) - 错误码
+            + 2000 (number) - 成功
+        + errorMessage - 错误描述
+        + result
+            + id: 1 (number) - 体育中心编号
+            + name: 上海东方体育中心 - 体育中心名称
+            + address: 浦东新区东方路100号 - 体育中心地址
+            + phone: 400888888 - 体育中心电话
+            + description - 体育中心简介
+            + openTime: 8:00 ~ 22:00 - 营业时间段
+            + tips: 该场地暂不支持退换 - 用户须知
+            + photos (array[string]) - 图片链接
+            + courts (array[CourtDetail]) - 名下所有场馆
+
+## 运动中心地址 [/api/v1/center/location{?id}]
++ Parameters
+    + id: 1 - 体育中心编号
+
+### 获取运动中心地址信息 [GET]
+
++ Response 200 (application/json)
+    + Attributes
+        + errorCode (enum) - 错误码
+            + 2000 (number) - 成功
+        + errorMessage - 错误描述
+        + result
+            + id: 1 (number) - 体育中心编号
+            + name: 上海东方体育中心 - 体育中心名称
+            + address: 浦东新区东方路100号 - 体育中心地址
+            + lng: 120.69136(number) - 经度
+            + lat: 27.98386(number) - 纬度
+
+
+## 预订日期 [/api/v1/court/date{?court}]
+
++ Parameters
+    + court - 场馆编号
+
+### 获得场馆可预订日期范围 [GET]
++ Response 200 (application/json)
+    + Attributes
+        + errorCode (enum) - 错误码
+            + 2000 (number) - 成功
+            + 4000 (number) - 请求参数无效，即court参数不存在
+        + errorMessage - 错误描述
+        + result (array)
+            + (object)
+                + date: 20160823 - 日期
+                + weekday: 周一 - 星期的第几天
+
+## 场次 [/api/v1/court/fields{?date,court}]
+
++ Parameters
+    + date: 20160823 (optional) - 日期，不传就返回今天的场次
+    + court - 场馆编号
+
+### 获取单个场馆的场次信息 [GET]
+
++ Response 200 (application/json)
+
+    + Attributes
+        + errorCode (enum) - 错误码
+            + 2000 (number) - 成功
+            + 4000 (number) - 请求参数无效，即date不在可预订范围内或者court参数不存在
+        + errorMessage - 错误描述
+        + result
+            + date: 20160825 - 所请求数据的日期
+            + fieldName (array)
+                + (object)
+                    + fieldNumber: 3 (number) - 场地序号
+                    + name: 3号场 - 场地名字
+            + timeRange: 8:00, 9:00, 10:00 (array) - 可预订时间范围, 已排序
+            + availableFields (array) - 可预订场次
+                + (array)
+                    + 9:00 - 开始时间
+                    + 3 (number) - 场地编号
+                    + 2356 (number) - 场次编号
+                    + 9 (number) - 组编号，0表示不属于任何组
+                    + 30 (number) - 价格
+                
+            
+
+## 长期订场场次 [/api/v1/court/longterm{?court}]
+
++ Parameters
+    + court - 场馆编号
+
+### 获取长期订场信息 [GET]
+
++ Response 200 (application/json)
+
+    + Attributes
+        + errorCode (enum) - 错误码
+            + 2000 (number) - 成功
+        + errorMessage - 错误描述
+        + result
+            + startDate: 2016~09~21, 2016~09~28 (array[string]) - 开始日期
+            + fields (array)
+                + (object)
+                    + fieldNumber: 3 (number) - 场地序号
+                    + name: 3号标准场 - 场地名
+                    + options (array)
+                        + (object)
+                            + id: 1(number) - 长期包场信息id
+                            + time - 时间段
+                            + price: 40 (number) - 价格
+            
+            + countLimit: 10 (number) - 次数上限
+
+## 用户单次包场订单 [/api/v1/user/order/onetime]
+
+### 提交单次包场订单 [POST]
+
++ Request (application/json)
+    + Attributes
+        + fieldItemIds : 2234, 2256 (array[number]) - 场次编号号列表
+        + date: 20160825 - 日期
+
++ Response 200 (application/json)
+    + Attributes
+        + errorCode (enum) - 错误码
+            + 2000 (number) - 成功
+            + 4001 (number) - 不在可预订日期范围
+            + 4002 (number) - 场次已被预订
+            + 4003 (number) - 场次数超过上限
+        + errorMessage - 错误描述
+        + result
+            + orderNumber: 20164141243134234 - 创建的订单号
+
+
+
+## 用户长期包场订单 [/api/v1/user/order/longterm]
+
+### 提交长期包场订单 [POST]
+
++ Request (application/json)
+    + Attributes
+        + courtId: 2 (number) - 场馆编号
+        + fieldNumber: 3 (number) - 场地序号
+        + startDate: 2016~08~26 - 开始日期
+        + optionId (number)
+        + count: 5 (number) - 次数
+        
++ Response 200 (application/json)
+    + Attributes
+        + errorCode (enum) - 错误码
+            + 2000 (number) - 成功
+            + 4001 (number) - 不在可预订日期范围
+            + 4002 (number) - 场次已被预订
+            + 4004 (number) - 预订次数超过上限
+        + errorMessage - 错误描述
+        + result
+            + orderNumber: 205390294024 - 创建的订单号
+
+
+## 售票列表 [/api/v1/court/tickets{?court,pageStart,pageCount}]
+
++ Parameters
+    + court - 场馆编号
+    + pageStart (number, optional) - 从第几条记录开始请求，带pageStart则必须带pageCount
+    + pageCount (number, optional) - 请求记录数量，固定为10，带pageCount则必须带pageStart
+
+### 获取单个场馆的售票列表信息 [GET]
+
++ Response 200 (application/json)
+    + Attributes
+        + errorCode (enum) - 错误码
+            + 2000 (number) - 成功
+            + 4000 (number) - 请求参数无效，court参数不存在
+        + errorMessage - 错误描述
+        + result
+            + hasNextPage: true (boolean) - 是否有下一页
+            + totalCount: 10 (number) - 总记录数
+            + rows (array)
+                + (object)
+                    + ticketId: 59 (number) - 售票id号
+                    + ticketName: 游泳次票 [白天 9:00~17:00] (string) - 次票名字
+                    + originalPrice: 99 (number) - 原始价格
+                    + price: 2 (number) - 实际价格
+                    + ticketIntroduction: 次票介绍 (string) - 次票介绍
+                    + discountInfo
+                        + type (enum) - 优惠类型
+                            + discount - 折扣
+                        + description - 优惠描述
+                        + timeLimit (number) - 时间限制
+                    + soldCount (number) - 已售数量
+
+## 售票 [/api/v1/ticket{?ticketId}]
+
++ Parameter
+    + ticketId - 售票id
+
+### 获取单个售票的信息 [GET]
+
++ Response 200 (application/json)
+    + Attributes
+        + errorCode (enum) - 错误码
+            + 2000 (number) - 成功
+            + 4000 (number) - 请求参数无效，售票不存在或者无权访问该售票
+        + errorMessage - 错误描述
+        + result
+            + ticketId: 59 (number) - 售票id号
+            + centerName: 上海东方体育中心 (string) - 场馆名
+            + ticketName: 游泳次票 [白天 9:00~17:00] (string) - 次票项目名
+            + price: 99 (number) - 原始价格
+            + actualPrice: 2 (number) - 实际价格
+            + ticketIntroduction: 次票介绍 (string) - 次票介绍
+            + consumptionInstruction: 消费须知 (string) - 消费须知
+            + tips: !该场地购票后不支持退换 (string) - 提示信息
+            + discountInfo
+                + type (enum) - 优惠类型
+                    + discount - 折扣
+                + description - 优惠描述
+                + timeLimit (number) - 时间限制
+
+
+## 用户售票订单 [/api/v1/user/order/ticket]
+
+### 提交售票订单 [POST]
+
++ Request (application/json)
+    + Attributes
+        + ticketId: 售票场次编号
+        + count: 5
+        
++ Response 200 (application/json)
+    + Attributes
+        + errorCode (enum) - 错误码
+            + 2000 (number) - 成功
+            + 4004 (number) - 预订次数超过上限
+        + errorMessage - 错误描述
+        + result
+            + orderNumber: 205390294024 - 创建的订单号
+
+## 售票转赠 [/api/v1/ticket/donate{?donateId}]
++ Parameter
+    + donateId (number) - 赠票Id号
+
+### 获取赠票信息 [GET]
+
++ Response 200 (application/json)
+    + Attributes
+        + errorCode (enum) - 错误码
+            + 2000 (number) - 成功
+            + 4000 (number) - 请求参数无效
+        + errorMessage - 错误描述
+        + result
+            + ticketId: 13702479457 (number) - 受赠的ticketId号
+            + ticketName: 游泳次票 [白天 9:00~17:00] - 赠票名
+            + count: 6 (number) - 赠票总数
+            + status (enum) - 赠票分享状态
+                + 0 (number) - 赠票领取完
+                + 1 (number) - 赠票还可领取
+            + shareUrl: https://open.weixin.qq.com/connect/oauth2/authorize?appid=&redirect_uri=&response_type=code&scope=snsapi_userinfo&state=donate_75&#wechat_redirect (string) - 分享链接
+            + receiveInfos (array)
+                + (object)
+                    + receiverName: 小明 (string) - 受赠者昵称
+                    + receiverIconUrl: http://test.39.cn/sponsor/icon/137884073.png (string) - 受赠者头像
+                    + receiveTime: 2017~07~15 (string) - 获取赠票时间
+                    + receiveCount: 6 - 券数
+ 
+### 售票转赠 [POST]
+
++ Request (application/json)
+    + Attributes
+        + ticketId (number) - 转赠的package Id号
+        + count (number) - 转赠的券数
+        
++ Response 200 (application/json)
+    + Attributes
+        + errorCode (enum) - 错误码
+            + 2000 (number) - 成功
+            + 4000 (number) - 请求参数无效，次票不存在或者无权访问次票
+        + errorMessage - 错误描述
+        + result
+            + donateId: 166 (number) - 转赠Id号
+            + shareUrl: https://open.weixin.qq.com/connect/oauth2/authorize?appid=&redirect_uri=&response_type=code&scope=snsapi_userinfo&state=donate_75&#wechat_redirect (string) - 分享链接
+ 
+
+## 售票订单二维码 [/api/v1/ticket/qrcode]
+
+### 售票订单生成二维码/券号 [POST]
+
++ Request (application/json)
+    + Attributes
+        + orderId: 订单Id号
+        
++ Response 200 (application/json)
+    + Attributes
+        + errorCode (enum) - 错误码
+            + 2000 (number) - 成功
+            + 4000 (number) - 请求参数订单号不存在或无权访问
+        + errorMessage - 错误描述
+        + result
+            + qrcode: BASE64 (string) - 二维码次票的 base64 字符串
+            + ticketId: 113489015038174 - 次票Id
+            + ticketNo: aee31adc35134bbafe49 - 次票券号
+
+
+## 赠票领取 [/api/v1/ticket/receipt{?donateId}]
+
++ Parameter
+    + donateId (number) - 赠票Id号
+
+### 获取赠票信息 [GET]
+
++ Response 200 (application/json)
+    + Attributes
+        + errorCode (enum) - 错误码
+            + 2000 (number) - 成功
+            + 4000 (number) - 请求参数无效
+        + errorMessage - 错误描述
+        + result
+            + sponsor: 上海体育中心 (string) - 赠送者(微信昵称或场馆名)
+            + sponsorIcon: http://test.39.cn/sponsor/icon/137884073.png (string) - 赠送者头像
+            + sponsorType: 1 - 赠送者类型
+            + shareUrl: https://open.weixin.qq.com/connect/oauth2/authorize?appid=&redirect_uri=&response_type=code&scope=snsapi_userinfo&state=donate_75&#wechat_redirect (string) - 分享链接
+            + tickets (array)
+                + (object)
+                    + centerName: 上海体育中心 (string) - 场馆名
+                    + centerAddress - 体育中心地址
+                    + ticketId: 13702479457 (number) - 受赠的ticket package Id号
+                    + ticketName: 游泳次票 [白天 9:00~17:00] - 赠票名
+                    + sportType: 1 (SportType) - 运动类型
+                    + count: 3 (number) - 赠票数量
+                    + expireTime: 2017~07~15 (string) - 过期时间
+ 
+
+### 赠票领取 [POST]
+
++ Request (application/json)
+    + Attributes
+        + donateId: 26 (string) - 赠票赠送Id号
+        
++ Response 200 (application/json)
+    + Attributes
+        + errorCode (enum) - 错误码
+            + 2000 (number) - 成功
+            + 4000 (number) - 请求参数无效，赠票无效或无权访问
+        + errorMessage - 错误描述
+        + result
+            + ticketId: 13702479457 (number) - 受赠的ticket package Id号
+            + count: 6 (number) - 赠票数量
+            + sponsor: 上海体育中心 (string) - 赠送者(微信昵称或场馆名)
+            + expireTime: 2017~07~15 (string) - 过期时间
+
+        
+## 用户次票列表 [/api/v1/user/tickets{?type,pageStart,pageCount}]
+
++ Parameter
+    + type (TicketType, optional) - 次票类型，1(购票), 2(赠票)
+    + pageStart (number, optional) - 从第几条记录开始请求，带pageStart则必须带pageCount
+    + pageCount (number, optional) - 请求记录数量，固定为10，带pageCount则必须带pageStart
+
+### 用户次票列表 [GET]
+
++ Response 200 (application/json)
+    + Attributes
+        + errorCode (enum) - 错误码
+            + 2000 (number) - 成功
+            + 4000 (number) - 请求参数无效
+        + errorMessage - 错误描述
+        + result
+            + hasNextPage: true (boolean) - 是否有下一页
+            + totalCount: 10 (number) - 总记录数
+            + rows (array)
+                + (object)
+                    + ticketId: 138470173047 (string) - 次票Id, ticket package id
+                    + ticketName: 篮球次票 [夜间 19:00~21:00] (string) - 次票名称
+                    + expireTime: 2016.07.07 18:09:20 (string) - 过期时间
+                    + centerName: 上海体育中心 (string) - 场馆名
+                    + sportType (SportType) - 运动类型
+
+
+## 用户次票 [/api/v1/user/ticket{?ticketId}]
+
++ Parameter
+    + ticketId - 次票Id号，ticket package id
+
+### 获取用户单个次票 [GET]
+
++ Response 200 (application/json)
+    + Attributes
+        + errorCode (enum) - 错误码
+            + 2000 (number) - 成功
+            + 4000 (number) - 请求参数无效
+        + errorMessage - 错误描述
+        + result
+            + ticketId: 1234870970513 (string) - 赠票Id号, ticket contract id
+            + createTime: 2016~09~20 13:56:12 (string) - 赠票生成时间
+            + status (TicketStatus) - 赠票状态
+            + validPeriod: 半年 (string) - 有效期
+            + expireTime: 2017~07~05 08:12:03 (string) - 过期日期
+            + centerId: 1 (number) - 体育中心编号
+            + ticketInfo (array)
+                + (object)
+                    + ticketPackageId: 23 (number) - 券票packageId号
+                    + ticketContractId: 134701740 (string) - 券票Id号
+                    + ticketNo: DD2187407307407 (string) - 券号
+                    + status (TicketStatus) - 券状态
+                    + updateTime: 2017~01~24 20:31:36 (string) - 更新时间
+            + donateInfo (array)
+                + (object)
+                    + donateId: 21321 (number) - 转赠ID
+                    + donateCount: 5 (number) - 本次转赠的票数
+                    + ticketsNo (array) - 转赠的票号
+                    + received: false - 是否已赠送
+            + centerName - 体育中心名称
+            + centerAddress - 体育中心地址
+            + centerPhone - 体育中心电话
+            + sportType: 篮球 - 运动类型
+            + ticketName: 游泳赠票 [白天 9:00~17:00] - 项目名
+            + ticketIntroduction: 次票介绍 (string) - 次票介绍
+            + consumptionInstruction: 消费须知 (string) - 消费须知
+            + userPhone - 预订手机号
+
+
+## 会员卡列表 [/api/v1/court/cards{?court,pageStart,pageCount}]
+
++ Parameters
+    + court - 场馆编号
+    + pageStart (number, optional) - 从第几条记录开始请求，带pageStart则必须带pageCount
+    + pageCount (number, optional) - 请求记录数量，固定为10，带pageCount则必须带pageStart
+
+### 获取单个场馆的会员卡列表 [GET]
+
++ Response 200 (application/json)
+    + Attributes
+        + errorCode (enum) - 错误码
+            + 2000 (number) - 成功
+            + 4000 (number) - 请求参数无效，court参数不存在
+        + errorMessage - 错误描述
+        + result
+            + hasNextPage: true (boolean) - 是否有下一页
+            + totalCount: 10 (number) - 总记录数
+            + rows (array) - 会员卡数组
+                + (object)
+                    + cardId: 1205 (number) - 会员卡id号
+                    + cardName: 游泳半年卡 (string) - 会员卡名称
+                    + price: 2888 (number) - 价格
+                    + cardIntroduction:  会员卡说明 (string) - 会员卡说明
+                    + discounts (array)
+                        + (object)
+                            + type - 优惠类型
+                            + description - 优惠描述
+                            + countLimit (number) - 数量限制
+                            + timeLimit (number) - 时间限制
+                    + soldCount (number) - 已售数量
+
+## 会员卡 [/api/v1/card{?cardId}]
+
++ Parameter
+  + cardId - 会员卡信息
+
+### 获取单个会员卡的信息 [GET]
+
++ Response 200 (application/json)
+    + Attributes
+        + errorCode (enum) - 错误码
+            + 2000 (number) - 成功
+            + 4000 (number) - 请求参数无效，会员卡不存在或者无权访问该会员卡
+        + errorMessage - 错误描述
+        + result
+            + cardContractId: 1 (number) - 会员卡id号
+            + cardNo: T17021100042473323451
+            + cardName: 半年会员卡
+            + centerName: 尚武体育龙湾中学体育馆 (string) - 场馆名
+            + price: 2888 (number) - 价格
+            + validPeriod: 半年 (string) - 有效期
+            + createTime: 2017-02-11 (string) - 购买日期
+            + expireTime: 2017-08-12 (string) - 过期日期
+            + cardIntroduction:  会员卡说明 (string) - 会员卡说明
+            + discounts (array)
+                + (object)
+                    + type (enum)
+                        + cash - 满减
+                        + discount - 折扣
+                    + leastAmount (number) - 金额使用门槛，在满减场景下使用
+                    + leastCount (number) - 数量使用门槛
+                    + amount (number) - 满减或者折扣数量，例减5元则为500，5折则为50
+                    + countLimit (number) - 购买数量上限
+                    + timeLimit (number) - 时间限制
+
+## 用户会员卡订单 [/api/v1/user/order/card]
+
+### 提交会员卡订单 [POST]
+
++ Request (application/json)
+    + Attributes
+        + cardId: 某类会员卡Id
+        
++ Response 200 (application/json)
+    + Attributes
+        + errorCode (enum) - 错误码
+            + 2000 (number) - 成功
+            + 4004 (number) - 预订次数超过上限
+        + errorMessage - 错误描述
+        + result
+            + orderNumber: 20170105132511 - 创建的订单号
+
+ 
+## 用户会员卡列表 [/api/v1/user/cards{?pageStart,pageCount}]
+
++ Parameter
+    + pageStart (number, optional) - 从第几条记录开始请求，带pageStart则必须带pageCount
+    + pageCount (number, optional) - 请求记录数量，固定为10，带pageCount则必须带pageStart
+
+### 获取用户会员卡列表 [GET]
+
++ Response 200 (application/json)
+    + Attributes
+        + errorCode (enum) - 错误码
+            + 2000 (number) - 成功
+        + errorMessage - 错误描述
+        + result
+            + hasNextPage: true (boolean) - 是否有下一页
+            + totalCount: 10 (number) - 总记录数
+            + rows (array)
+                + (object)
+                    + cardContractId: 会员卡Id号
+                    + cardName: 半年会员卡 (string) - 会员卡名字
+                    + cardNo: T17021100042473323451 (string) - 会员卡卡号
+                    + price: 2888 (number) - 价格
+                    + expired: false (boolean) - 是否过期
+                    + iconUrl: http://test.39.cn/card/icon/137884073.png (string) - 会员卡图标
+                    + centerName: 尚武体育龙湾中学体育馆 (string) - 场馆名
+            
+
+## 用户会员卡 [/api/v1/user/card{?cardId}]
+
++ Parameter
+    + cardId - 会员卡Id号
+
+### 获取单个会员卡信息 [GET]
+
++ Response 200 (application/json)
+    + Attributes
+        + errorCode (enum) - 错误码
+            + 2000 (number) - 成功
+            + 4000 (number) - 请求参数无效，会员卡不存在或者无权访问该会员卡
+        + errorMessage - 错误描述
+        + result
+            + cardContractId: 2 (number) - 会员卡Id号
+            + cardNo: 1470aed410aac00185 (string) - 会员卡号
+            + iconUrl: http://test.39.cn/card/icon/137884073.png (string) - 会员卡图标
+            + centerName: 上海东方体育中心 (string) - 场馆名
+            + cardName: 游泳半年卡 (string) - 会员卡名字
+            + price: 2888 (number) - 价格
+            + createTime: 2017~01~05 (string) - 购买日期
+            + expireTime: 2017~07~05 (string) - 过期日期
+            + validPeriod: 半年 (string) - 有效期
+            + cardIntroduction: 会员卡说明 (string) - 会员卡说明
+
+
+## 用户信息 [/api/v1/user/info]
+
+### 获取用户信息 [GET]
+
++ Response 200 (application/json)
+    + Attributes
+        + errorCode (enum) - 错误码
+            + 2000 (number) - 成功
+        + errorMessage - 错误描述
+        + result
+            + nickname: 小豪 - 昵称
+            + phone: 13677777777 - 手机号
+            + balance: 36 (number) - 余额
+            + headUrl - 头像链接
+            + locCity - 定位城市
+            + selectCity - 选择的城市
+        
+
+### 修改用户信息 [POST]
+
++ Request (application/json)
+    + Attributes
+        + phone: 13500000000 - 手机号
+        + verifyCode: 12346 - 验证码
+        + latitude: 23.2369 - 纬度
+        + longitude: 131.9405 - 经度
+        
++ Response 200 (application/json)
+    + Attributes
+        + errorCode (enum) - 错误码
+            + 2000 (number) - 成功
+            + 4013 (number) - 验证码错误
+            + 4014 (number) - 手机号格式错误
+            + 4015 (number) - 手机号已绑定
+            + 4019 (number) - 手机号已经被其他账号绑定
+        + errorMessage - 错误描述
+        + result
+            + locCity: shanghai - 定位城市
+            + locChanged: false - 定位城市是否变化
+
+        
+## 用户头像 [/api/v1/user/photo/upload]
+### 设置用户头像 [POST]
+
++ Request (application/json)
+    + Attributes
+        + mediaId: 1689 - 保存在微信里的图片Id号
+        
++ Response 200 (application/json)
+    + Attributes
+        + errorCode (enum) - 错误码
+            + 2000 (number) - 成功
+            + 4000 (number) - 请求参数无效
+        + errorMessage - 错误描述
+        + result
+            + url: http://oldcfosyh.bkt.clouddn.com/test:e2014cfa4ac2455e8ca24542e59f2c47.png (string) - 上传到七牛的图片url
+
+## 用户交易密码 [/api/v1/user/password/trade]
+
+### 获取用户是否设置过交易密码 [GET]
+
++ Response 200 (application/json)
+    + Attributes
+        + errorCode (enum) - 错误码
+            + 2000 (number) - 成功
+        + errorMessage - 错误描述
+        + result
+            + tradePasswordSet: true (boolean)
+
+### 设置用户交易密码 [POST]
+
++ Request (application/json)
+    + Attributes
+        + newPassword: 122324 - 新交易密码，6位数字
+        + verifyCode: 234564 (string, optional) - 手机验证码，如果是第一次设置，不需要验证码
+        
++ Response 200 (application/json)
+    + Attributes
+        + errorCode (enum) - 错误码
+            + 2000 (number) - 成功
+            + 4009 (number) - 密码格式错误
+            + 4012 (number) - 未绑定手机号
+            + 4013 (number) - 验证码错误
+        + errorMessage - 错误描述
+        
+
+        
+## 订单列表 [/api/v1/user/orders{?status,pageStart,pageCount,bookType}]
+
+### 获取用户订单列表 [GET]
+
++ Parameters
+    + status (enum, optional) - 订单状态, 不带参数表示取所有订单
+        + 1 (number) - 待支付
+        + 2 (number) - 已支付
+        + 3 (number) - 已取消
+        + 4 (number) - 已完成
+        + 5 (number) - 已退款
+    + pageStart (number, optional) - 从第几条记录开始请求，带pageStart则必须带pageCount
+    + pageCount (number, optional) - 请求记录数量，固定为10，带pageCount则必须带pageStart
+    + bookType (BookType, optional) - 订单类型
+
++ Response 200 (application/json)
+    + Attributes
+        + errorCode (enum) - 错误码
+            + 2000 (number) - 成功
+        + errorMessage - 错误描述
+        + result
+            + hasNextPage: true (boolean) - 是否有下一页
+            + totalCount: 100 (number) - 总记录数
+            + rows (array)
+                + (object)
+                    + orderNumber - 订单号
+                    + centerName - 体育中心名称
+                    + sportName: 篮球 - 运动类型
+                    + orderFee: 200 (number) - 订单金额
+                    + orderDate: 2016~09~25 (string) - 预订日期
+                    + createTime: 2016~09~20 13:56:12 - 订单生成时间
+                    + content: 游泳次票 [白天 9:00~17:00] (string) - 次票名字
+                    + count: 3 (number) - 票数量或场地数量
+                    + bookType (enum) - 预订类型
+                        + 1 (number) - 单次订场
+                        + 2 (number) - 长期订场
+                        + 4 (number) - 售票
+                        + 8 (number) - 会员卡
+                    + orderStatus (enum) - 订单状态
+                        + 1 (number) - 待支付
+                        + 2 (number) - 已支付
+                        + 3 (number) - 已取消
+                        + 4 (number) - 已完成
+                        + 5 (number) - 已退款
+
+
+## 订单 [/api/v1/user/order{?orderNumber}]
+
++ Parameter
+    + orderNumber - 订单号
+
+### 获取用户单个订单 [GET]
+
++ Response 200 (application/json)
+
+    + Attributes
+        + errorCode (enum) - 错误码
+            + 2000 (number) - 成功
+            + 4000 (number) - 请求参数无效，订单号不存在或者无权访问该订单
+        + errorMessage - 错误描述
+        + result
+            + orderNumber: 订单号
+            + orderStatus (enum) - 订单状态
+                + 1 (number) - 待支付
+                + 2 (number) - 已支付
+                + 3 (number) - 已取消
+                + 4 (number) - 已完成
+                + 5 (number) - 已退款
+            + createTime: 2016~09~20 13:56:12 - 订单生成时间
+            + centerId: 1 (number) - 体育中心编号
+            + centerName - 体育中心名称
+            + centerAddress - 体育中心地址
+            + centerPhone - 体育中心电话
+            + sportName: 篮球 - 运动类型
+            + userPhone - 预订手机号
+            + orderDate: 2016~09~21 - 预订日期
+            + bookType (enum) - 预订类型
+                + 1 (number) - 单次订场
+                + 2 (number) - 长期订场
+                + 4 (number) - 售票
+                + 8 (number) - 会员卡
+            + onetimeInfo (array)
+                + (object)
+                    + fieldName: 5号标准场 - 场地名
+                    + time: 19:00 ~ 20:00 - 时间段
+                    + price: 50 (number) - 价格
+            + payMethod: 微信支付 - 支付方式
+            + orderFee: 400 (number) - 订单金额
+            + ticketInfo (array)
+                + (object)
+                    + ticketPackageId: 23 (number) - 券票packageId号
+                    + ticketContractId: 134701740 (string) - 券票Id号
+                    + ticketNo: DD2187407307407 (string) - 券号
+                    + status (TicketStatus) - 券状态
+                    + updateTime: 2017~01~24 20:31:36 (string) - 更新时间
+            + cardInfo
+                + cardContractId: 134701740 (string) - 会员卡Id
+                + cardNo: DD2187407307407 (string) - 会员卡号
+                + cardName: 游泳半年卡 (string) - 会员卡名
+                + expireTime: 2017~01~24 00:00:00 (string) - 过期时间
+            + longtermInfo
+                + fieldName: 5号标准场 - 场地名
+                + time: 19:00 ~ 20:00 - 时间段
+                + leftCount: 5 (number) - 剩余次数
+                + totalCount: 10 (number) - 总次数
+                + price: 40 (number) - 单次价格
+                + date: 2016~09~21, 2016~09~28 (array[string]) - 预订日期
+            + ableToRefund: true (boolean) - 可以发起退款
+            + unableRefundReason: 已经超过退款时限 - 无法退款原因
+            + refundStatus (enum) - 订单退款状态，0表示非退款订单
+                + 1 (number) - 退款成功
+                + 2 (number) - 退款失败
+                + 3 (number) - 退款中
+
+### 取消订单 [DELETE]
+
++ Request (application/json)
+
+    + Attributes
+        + orderNumber - 订单号
+
++ Response 200 (application/json)
+    + Attributes
+        + errorCode (enum) - 错误码
+            + 2000 (number) - 成功
+            + 4018 (number) - 取消订单失败
+        + errorMessage - 错误描述
+
+
+## 订单支付 [/api/v1/user/order/pay]
+
+### 支付单个订单 [POST]
+
++ Request (application/json)
+    + Attributes
+        + payMethod (enum) - 支付方式
+            + ACCOUNT - 金币(余额)支付
+            + WECHAT - 微信支付
+            + CLUB - 俱乐部账户支付
+        + clubId: 121242 (number) - 如果是俱乐部账户支付的话，需要提供俱乐部编号
+        + orderNumber - 订单编号
+
++ Response 200 (application/json)
+    + Attributes
+        + errorCode (enum) - 错误码
+            + 2000 (number) - 成功
+            + 4000 (number) - 请求参数无效
+            + 4005 (number) - 账户余额不足
+            + 4006 (number) - 订单状态不可支付
+            + 4007 (number) - 订单已过期
+            + 4008 (number) - 微信统一下单接口不可用
+            + 4016 (number) - 账户余额不足
+            + 4017 (number) - 账户支付失败
+        + errorMessage - 错误描述
+        + result - 返回 2000 时才有值
+            + appId: wx8888888888888888 - 公众号ID
+            + timeStamp: 1414561699 - 当前时间戳，以秒为单位
+            + nonceStr: 5K8264ILTKCH16CQ2502SI8ZNMTM67VS - 随机字符串
+            + prepayId: 123456789 - 预支付号
+            + signType: MD5 - 签名方式，暂只支持MD5
+            + paySign: C380BEC2BFD727A4B6845133519F3AD6 - 签名
+
+## 退款订单列表 [/api/v1/user/order/refunds{?pageStart,pageCount}]
+
+### 获取用户退款订单列表 [GET]
+
++ Parameters
+    + pageStart (number, optional) - 从第几条记录开始请求，带pageStart则必须带pageCount
+    + pageCount (number, optional) - 请求记录数量，固定为10，带pageCount则必须带pageStart
+
++ Response 200 (application/json)
+    + Attributes
+        + errorCode (enum) - 错误码
+            + 2000 (number) - 成功
+        + errorMessage - 错误描述
+        + result
+            + hasNextPage: true (boolean) - 是否有下一页
+            + totalCount: 100 (number) - 总记录数
+            + rows (array)
+                + (object)
+                    + orderNumber - 订单号
+                    + centerName - 体育中心名称
+                    + sportName: 篮球 - 运动类型
+                    + orderFee: 400 (number) - 订单金额
+                    + refundFee: 360 (number) - 退款金额
+                    + orderDate: 2016~09~25 (string) - 预订日期
+                    + createTime: 2016~09~20 13:56:12 - 申请退款时间
+                    + bookType (enum) - 预订类型
+                        + 1 (number) - 单次订场
+                        + 2 (number) - 长期订场
+                        + 4 (number) - 售票
+                        + 8 (number) - 会员卡
+                    + refundStatus (enum) - 订单退款状态
+                        + 1 (number) - 退款成功
+                        + 2 (number) - 退款失败
+                        + 3 (number) - 退款中
+
+## 退款订单 [/api/v1/user/order/refund{?orderNumber}]
+
++ Parameter
+    + orderNumber - 退款订单号
+
+### 获取用户单个退款订单 [GET]
+
++ Response 200 (application/json)
+
+    + Attributes
+        + errorCode (enum) - 错误码
+            + 2000 (number) - 成功
+            + 4000 (number) - 请求参数无效，订单号不存在或者无权访问该订单
+        + errorMessage - 错误描述
+        + result
+            + orderNumber - 订单号
+            + refundStatus (enum) - 订单退款状态
+                + 1 (number) - 退款成功
+                + 2 (number) - 退款失败
+                + 3 (number) - 退款中
+            + refundReason: 用户原因 - 申请退款原因
+            + createTime: 2016~09~20 13:56:12 - 申请退款时间
+            + refundMethod: 微信支付 - 退款方式
+            + orderFee: 400 (number) - 订单金额
+            + refundFee: 360 (number) - 退款金额
+            + serviceFee: 40 (number) - 手续费
+            + refundNotify: 退款审核通过，实际到账时间请以微信退款通知为准 - 退款通知
+
+### 订单申请退款 [POST]
+
++ Request (application/json)
+    + Attributes
+        + refundReason (enum) - 申请退款原因
+            + 1 (number) - 用户原因
+            + 2 (number) - 商户原因
+            + 3 (number) - 天气原因
+        + orderNumber - 订单号
+
++ Response 200 (application/json)
+    + Attributes
+        + errorCode (enum) - 错误码
+            + 2000 (number) - 成功
+            + 4020 (number) - 退款失败
+        + errorMessage - 错误描述
+        + result - 返回 2000 时才有值
+            + refundNotice - 退款通知，返回“退款成功”或者“退款申请成功,等待商户审核”
+
+
+## 手机验证码 [/api/v1/phone/verification]
+
+### 发送手机验证码 [POST]
+
++ Request (application/json)
+    + Attributes
+        + phone: 1360000000 - 手机号
+
++ Response 200 (application/json)
+    + Attributes
+        + errorCode (enum) - 错误码
+            + 2000 (number) - 成功
+            + 4011 (number) - 验证码发送失败
+        + errorMessage - 错误描述
+        
+        
+
+## 用户个人账户 [/api/v1/user/account]
+
+### 个人账户充值 [POST]
+
++ Request (application/json)
+    + Attributes
+        + amount: 100 (number) - 金额
+        + payMethod: WECHAT - 支付方式
+        
++ Response 200 (application/json)
+    + Attributes
+        + errorCode (enum) - 错误码
+            + 2000 (number) - 成功
+        + errorMessage - 错误描述
+        + result - 返回 2000 时才有值
+            + appId: wx8888888888888888 - 公众号ID
+            + timeStamp: 1414561699 - 当前时间戳，以秒为单位
+            + nonceStr: 5K8264ILTKCH16CQ2502SI8ZNMTM67VS - 随机字符串
+            + prepayId: 123456789 - 预支付号
+            + signType: MD5 - 签名方式，暂只支持MD5
+            + paySign: C380BEC2BFD727A4B6845133519F3AD6 - 签名
+            
+
+## 微信jssdk签名 [/api/v1/jssdk/signature]
+
+### 获取微信jssdk签名 [GET]
+
++ Request (application/json)
+    + Attributes
+        + url: test.39sports.cn (string) - 安全域名
+
++ Response 200 (application/json)
+    + Attributes
+        + errorCode (enum) - 错误码
+            + 2000 (number) - 成功
+        + errorMessage - 错误描述
+        + result - 返回 2000 时才有值
+            + appId: wx8888888888888888 - 公众号ID
+            + timeStamp: 1482989600 - 当前时间戳，以秒为单位
+            + nonceStr: b7c8c5f8907c4425 - 随机字符串
+            + signature: baaed12214b2c946b604eaacafd1e8a713dd6409 - 签名
+
+## 培训 - 课程列表 [/api/v1/training/courses{?city,pageNumber,pageCount,filterType}]
+
++ Parameters
+    + city: wenzhou - 城市标识
+    + pageNumber (number, optional) - 页码，从1开始
+    + pageCount (number, optional) - 请求记录数量，固定为10，带pageCount则必须带pageStart
+    + filterType (string, optional) - 过滤类型，目前只有recommend一种
+
+### 获取培训课程列表 [GET]
+
++ Response 200 (application/json)
+    + Attributes
+        + errorCode (enum) - 错误码
+            + 2000 (number) - 成功
+        + errorMessage - 错误描述
+        + result
+            + hasNextPage: true (boolean) - 是否有下一页
+            + totalCount: 10 (number) - 总记录数
+            + rows (array)
+                + (object)
+                    + sportType (SportType) - 运动类型
+                    + courseId: 1(number) - 课程id
+                    + courseName: 游泳初级班 (string) - 课程名称
+                    + address: 浦东新区东方路100号 - 授课场馆地址
+                    + price: 40 (number) - 课程价格
+                    + recommend: true (boolean) - 是否推荐
+                    + photoUrl: http://test.39sports.cn/136/course-139/4F55184E-FC4E-421F-8D8C-A27CF92775B5.png (string) - 培训课程图片
+
+## 培训 - 课程详情 [/api/v1/training/course{?id}]
+
++ Parameters
+    + id: 1 - 课程编号
+
+### 获取培训课程详情 [GET]
+
++ Response 200 (application/json)
+    + Attributes
+        + errorCode (enum) - 错误码
+            + 2000 (number) - 成功
+        + errorMessage - 错误描述
+        + result
+            + sportType (SportType) - 运动类型
+            + courseId: 1(number) - 课程id
+            + courseName: 游泳初级班 (string) - 课程名称
+            + address: 浦东新区东方路100号 - 授课场馆地址
+            + price: 40 (number) - 课程价格
+            + lessonCount: 10 (number) - 课时长度
+            + courseTimePlan: 单数日（周一，三，五上课）, 双数日（周二，四，六上课） (string) - 课程安排形式
+            + courseDescription: 初步学会蛙泳，能独立游泳20米 - 课程描述
+            + courseContent: XXXXXX - 课程内容
+            + recommend: true (boolean) - 是否推荐
+            + photoUrl: http://test.39sports.cn/136/course-139/4F55184E-FC4E-421F-8D8C-A27CF92775B5.png (string) - 培训课程详情图片
+
+## 培训 - 下一节课程 [/api/v1/user/nextLesson]
+
+### 获取下一节课 [GET]
+
++ Response 200 (application/json)
+    + Attributes
+        + errorCode (enum) - 错误码
+            + 2000 (number) - 成功
+        + errorMessage - 错误描述
+        + result (array)
+            + (object)
+                + sportType (SportType) - 运动类型
+                + classTraineeId: 1(number) - 班级学员id
+                + courseName: 游泳初级班 (string) - 班级名称
+                + address: 浦东新区东方路100号 - 授课场馆地址
+                + traineeName: 张俊彬 (string) - 被培训人
+                + lessonDate: 2017~07~02 - 下节课日期
+                + lessonTime: 8:00 ~  9:00 (string)  - 下节课时间
+
+
+## 培训 - 我的课程 [/api/v1/user/courses{?status,pageNumber,pageCount}]
+
++ Parameter
+    + status (string, optional) - 课程状态, "ongoing"(进行中), "done"(已完成)
+    
+### 获取用户课程列表 [GET]
+
++ Response 200 (application/json)
+    + Attributes
+        + errorCode (enum) - 错误码
+            + 2000 (number) - 成功
+            + 4000 (number) - 请求参数无效
+        + errorMessage - 错误描述
+        + result
+            + hasNextPage: true (boolean) - 是否有下一页
+            + totalCount: 10 (number) - 总记录数
+            + rows (array)
+                + (object)
+                    + classTraineeId: 135 (number) - Id号
+                    + courseName: XXXX游泳中级班 (string) - 课程名字
+                    + traineeName: 张俊彬 (string) - 被培训人
+                    + address: 龙湾区奥体中心万达对面 (string) - 场馆地址
+                    + sportType (SportType) - 运动类型
+                    + nextLessonDate: 2017~06~23 - 下节课日期
+                    + nextLessonTime: 09:00 ~ 10:00 - 下节课时间
+                    + status (enum) - 课程状态
+                        + ongoing - 进行中
+                        + done - 已完成
+
+
+## 培训 - 我的课程详情 [/api/v1/user/course{?classTraineeId}]
+
++ Parameter
+    + classTraineeId (number) - 课程Id号
+    
+### 获取用户课程详情 [GET]
+
++ Response 200 (application/json)
+    + Attributes
+        + errorCode (enum) - 错误码
+            + 2000 (number) - 成功
+            + 4000 (number) - 请求参数无效
+        + errorMessage - 错误描述
+        + result
+            + classTraineeId: 139 (number) - 用户课程Id号
+            + courseId: 1 (number) - 课程Id
+            + status: ongoing, done (string) - 课程状态
+            + courseName: XXXX游泳中级班 - 课程名称
+            + coursePhotoUrl - 课程照片链接
+            + className: 中级单数1班 - 班级名称
+            + coach: 文若杰 (string) - 教练名
+            + address: 龙湾区奥体中心万达对面 (string) - 场馆地址
+            + traineeId: 136 (number) - 被培训人Id号
+            + traineeName: 张俊彬 (string) - 被培训人
+            + traineeNumber: 1 (number) - 学员在班级内编号
+            + traineePhotoUrl - 培训人照片链接
+            + photoNum: 122 (number) - 培训图集数量
+            + lessonPhotoUrl: http://test.39sports.cn/136/course-139/4F55184E-FC4E-421F-8D8C-A27CF92775B5.png (string) - 培训图集第一张图
+            + lessons (array) - 课程排期
+                + (object)
+                    + date: 2017~06~08 (string) - 日期
+                    + time: 09:00 ~ 10:00 (string) - 时间段
+                    + isDone: true (boolean) - 是否已结束
+
+## 培训 - 动态 [/api/v1/user/trainee]
+
+### 获取用户动态信息 [GET]
+
++ Response 200 (application/json)
+    + Attributes
+        + errorCode (enum) - 错误码
+            + 2000 (number) - 成功
+            + 4000 (number) - 请求参数无效
+        + errorMessage - 错误描述
+        + result (array)
+            + (object)
+                + traineeId: 136 (number) - 被培训人Id号
+                + traineeName: 张俊彬 (string) - 被培训人
+                + traineePhotoUrl - 培训人头像链接
+                + courseNames: 初级游泳课,中级游泳课 (array[string]) - 进行中的课程名称
+                + photoNum: 122 (number) - 培训图集数量
+                + photos (array)
+                    + (object)
+                        + photoUrl: http://xxx/xxx.png - 培训图片
+                        + thumbnailUrl: http://xxx/xxx.png - 培训图片
+                + lastModified: 2017~06~01 12:00 (string) - 最近更新时间
+
+### 绑定课程 [POST]
+
++ Response 200 (application/json)
+    + Attributes
+        + errorCode (enum) - 错误码
+            + 4012 (number) - 未绑定手机号
+            + 4040 (number) - 没有可绑定的课程
+        + errorMessage - 错误描述
+## 培训 - 相册 [/api/v1/user/trainee/gallery{?traineeId,classId,pageNumber,pageCount}]
+
++ Parameter
+    + traineeId: 136 (number) - 被培训人Id号
+    + classId: 223 (number, optional) - 班级编号，不传就返回培训人所有照片
+    + pageNumber (number, optional) - 页码，从1开始
+    + pageCount (number, optional) - 请求记录数量，固定为10，带pageCount则必须带pageStart
+
+### 获取培训图集 [GET]
+
++ Response 200 (application/json)
+    + Attributes
+        + errorCode (enum) - 错误码
+            + 2000 (number) - 成功
+            + 4000 (number) - 请求参数无效
+        + errorMessage - 错误描述
+        + result
+            + traineeId: 136 (number) - 被培训人Id号
+            + traineeName: 张俊彬 (string) - 被培训人
+            + photoGroup (array)
+                + (object)
+                    + courseName: xxxx游泳初级班 (string) - 课程名字
+                    + photos (array)
+                        + (object)
+                            + photoUrl: http://xxx/xxx.png - 培训图片
+                            + thumbnailUrl: http://xxx/xxx.png - 培训图片
+                    + courseDate: 2017~06~08 (string) - 课程日期
+                    + courseTime: 09:00 ~ 10:00 (string) - 课程时间
+                
+ 
+# Data Structure
+
+## SportInfo
++ type (SportType) - 运动类型的唯一标识
++ name: 羽毛球 - 运动名称
+
+## CenterSummary
++ id: 1 (number) - 体育中心编号
++ name: 上海东方体育中心 - 体育中心名称
++ address: 浦东新区东方路100号 - 体育中心地址
++ openTime: 8:00 ~ 22:00 - 营业时间
++ sportType (array[SportInfo]) - 运动类型
++ discounts (array)
+    + (object)
+        + type - 优惠类型
+        + description - 优惠信息描述
+
+## CourtDetail
++ id: 2 (number) - 场馆编号
++ sportType (SportType) - 运动类型
++ bookType (array[BookType]) - 支持的预订类型
++ defaultPrice: 30 (number) - 默认价格
++ tips: 该场地2小时起订 - 用户须知
++ supportRefund: true (boolean) - 是否支持单次订场的退款
+
+
+## SportType (enum)
++ 1 (number) - basketball
++ 2 (number) - badminton
++ 3 (number) - football
++ 4 (number) - tennis
++ 5 (number) - table tennis
++ 6 (number) - swimming
+
+## BookType (enum)
++ 1 (number) - 单次订场
++ 2 (number) - 长期包场
++ 4 (number) - 售票
++ 8 (number) - 会员卡
+
+## TicketType (enum)
++ 1 (number) - 购票
++ 2 (number) - 赠票
+
+## TicketStatus (enum)
++ 1 (number) - 未使用
++ 2 (number) - 已使用
++ 3 (number) - 转赠中
++ 4 (number) - 已转赠
++ 5 (number) - 已过期
++ 6 (number) - 已领取
